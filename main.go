@@ -26,6 +26,7 @@ func main() {
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	}
+	isMapView := false
 
 	rl.InitWindow(1024, 896, "Doodle Crawler")
 	defer rl.CloseWindow()
@@ -38,9 +39,17 @@ func main() {
 		rl.BeginDrawing()
 		rl.ClearBackground(rl.Gray)
 
-		mapOne.DrawMap()
+		if rl.IsKeyPressed(rl.KeyTab) {
+			isMapView = !isMapView
+		}
 
-		playerOne.Draw()
+		switch isMapView {
+		case true:
+			mapOne.DrawMap()
+			playerOne.Draw()
+		case false:
+		}
+
 		playerOne.Move()
 		rl.EndDrawing()
 	}
