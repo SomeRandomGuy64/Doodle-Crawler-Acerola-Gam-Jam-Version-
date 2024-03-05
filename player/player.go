@@ -3,6 +3,7 @@ package player
 import (
 	"doodle-crawler/directions"
 	"doodle-crawler/worldMaps"
+	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -35,21 +36,26 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 	var ray, mapX, mapY, mapPosition, depthOfField int32
 	var rayX, rayY, rayAngle, xOffset, yOffset float32
 
+	rayAngle = (float32(player.Facing) - 1) * (0.5 * math.Pi)
+	if rayAngle < 0 {
+		rayAngle += (2 * math.Pi)
+	}
+
 	for ray = 0; ray < 1; ray++ {
 		depthOfField = 0
 		aTan := float32(-1 / math.Tan(float64(rayAngle)))
 
 		//Looking northwards
 		if rayAngle > math.Pi {
-			rayY = float32(player.YPosition/player.MoveAmount*player.MoveAmount) - 0.001
-			rayX = (float32(player.YPosition)-rayY)*aTan + float32(player.XPosition)
+			rayY = (float32(player.YPosition) - 0.0001) - (float32(player.MoveAmount) / 2)
+			rayX = ((float32(player.YPosition)-rayY)*aTan + float32(player.XPosition))
 			yOffset = -float32(player.MoveAmount)
 			xOffset = -yOffset * aTan
 		}
 
 		//looking southwards
 		if rayAngle < math.Pi {
-			rayY = float32(player.YPosition/player.MoveAmount*player.MoveAmount) + -float32(player.MoveAmount)
+			rayY = (float32(player.YPosition) + float32(player.MoveAmount)) - (float32(player.MoveAmount) / 2)
 			rayX = (float32(player.YPosition)-rayY)*aTan + float32(player.XPosition)
 			yOffset = float32(player.MoveAmount)
 			xOffset = -yOffset * aTan
@@ -70,13 +76,13 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			if mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
 				depthOfField = 16
 			} else {
-				rayX = xOffset
-				rayY = yOffset
+				rayX += xOffset
+				rayY += yOffset
 				depthOfField += 1
 			}
 		}
-
 		rl.DrawLine(player.XPosition, player.YPosition, int32(rayX), int32(rayY), rl.Green)
+		fmt.Println(player.XPosition, player.YPosition, rayX, rayY, rayAngle)
 	}
 }
 
@@ -110,9 +116,9 @@ func (player *Player) Move() {
 
 func New() Player {
 	return Player{
-		XPosition:  81,
-		YPosition:  81,
-		MoveAmount: 54,
+		XPosition:  48,
+		YPosition:  48,
+		MoveAmount: 32,
 		Radius:     4,
 		Facing:     directions.East,
 	}

@@ -36,7 +36,7 @@ func New(xSize, ySize int32, mapDetails []int32) WorldMap {
 	return WorldMap{
 		XSize:      xSize,
 		YSize:      ySize,
-		BlockSize:  54,
+		BlockSize:  32,
 		MapDetails: mapDetails,
 	}
 }
