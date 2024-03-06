@@ -3,10 +3,13 @@ package player
 import (
 	"doodle-crawler/directions"
 	"doodle-crawler/worldMaps"
-	"fmt"
 	"math"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
+)
+
+const (
+	DR = 0.0174533 //one degree in radians
 )
 
 type Player struct {
@@ -34,11 +37,11 @@ func (player Player) Draw() {
 
 func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 	var ray, mapX, mapY, mapPosition, depthOfField int32
-	var rayX, rayY, rayAngle, xOffset, yOffset float32
+	var rayX, rayY, rayAngle, xOffset, yOffset, disH, disV float32
 
-	rayAngle = (float32(player.Facing) - 1) * (0.5 * math.Pi)
+	rayAngle = (float32(player.Facing)-1)*(0.5*math.Pi) - 30*DR
 
-	for ray = 0; ray < 2; ray++ {
+	for ray = 0; ray < 60; ray++ {
 
 		if rayAngle < 0 {
 			rayAngle += (2 * math.Pi)
@@ -46,6 +49,9 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 
 		//Check horizontal lines
 		depthOfField = 0
+		disH = 10000000
+		horizontalX := player.XPosition
+		horizontalY := player.YPosition
 		aTan := float32(-1 / math.Tan(float64(rayAngle)))
 
 		//Looking northwards
@@ -58,7 +64,7 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 
 		//looking southwards
 		if rayAngle < math.Pi {
-			rayY = (float32((player.YPosition>>5)<<5) + 64)
+			rayY = (float32((player.YPosition>>5)<<5) + float32(player.MoveAmount))
 			rayX = (float32(player.YPosition)-rayY)*aTan + float32(player.XPosition)
 			yOffset = float32(player.MoveAmount)
 			xOffset = -yOffset * aTan
@@ -76,7 +82,10 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			mapY = int32(math.Floor(float64(rayY / float32(player.MoveAmount))))
 			mapPosition = mapY*worldMap.XSize + mapX
 
-			if mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
+			if mapPosition > 0 && mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
+				horizontalX = int32(rayX)
+				horizontalY = int32(rayY)
+				disH = distance(float32(player.XPosition), float32(player.YPosition), float32(horizontalX), float32(horizontalY))
 				depthOfField = 16
 			} else {
 				rayX += xOffset
@@ -84,15 +93,17 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 				depthOfField += 1
 			}
 		}
-		rl.DrawLine(player.XPosition, player.YPosition, int32(rayX), int32(rayY), rl.Green)
 
 		//Check vertical lines
 		depthOfField = 0
+		disV = 10000000
+		verticalX := player.XPosition
+		verticalY := player.YPosition
 		nTan := float32(-math.Tan(float64(rayAngle)))
 
 		//Looking westwards
 		if rayAngle > math.Pi/2 && rayAngle < (3*math.Pi)/2 {
-			rayX = (float32((player.XPosition>>5)<<5) - 0.0001)
+			rayX = (float32((player.XPosition>>5)<<5) - 0.00001)
 			rayY = ((float32(player.XPosition)-rayX)*nTan + float32(player.YPosition))
 			xOffset = -float32(player.MoveAmount)
 			yOffset = -xOffset * nTan
@@ -100,7 +111,7 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 
 		//looking eastwards
 		if rayAngle < math.Pi/2 || rayAngle > (3*math.Pi)/2 {
-			rayX = (float32((player.XPosition>>5)<<5) + 64)
+			rayX = (float32((player.XPosition>>5)<<5) + float32(player.MoveAmount))
 			rayY = (float32(player.XPosition)-rayX)*nTan + float32(player.YPosition)
 			xOffset = float32(player.MoveAmount)
 			yOffset = -xOffset * nTan
@@ -118,7 +129,10 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			mapY = int32(math.Floor(float64(rayY / float32(player.MoveAmount))))
 			mapPosition = mapY*worldMap.XSize + mapX
 
-			if mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
+			if mapPosition > 0 && mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
+				verticalX = int32(rayX)
+				verticalY = int32(rayY)
+				disV = distance(float32(player.XPosition), float32(player.YPosition), float32(verticalX), float32(verticalY))
 				depthOfField = 16
 			} else {
 				rayX += xOffset
@@ -126,10 +140,23 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 				depthOfField += 1
 			}
 		}
-		rl.DrawLine(player.XPosition, player.YPosition, int32(rayX), int32(rayY), rl.Red)
-		fmt.Println(rayAngle, rayX, rayY, player.XPosition, player.YPosition)
 
+		if disV < disH {
+			rayX = float32(verticalX)
+			rayY = float32(verticalY)
+		}
+		if disH < disV {
+			rayX = float32(horizontalX)
+			rayY = float32(horizontalY)
+		}
+
+		rl.DrawLine(player.XPosition, player.YPosition, int32(rayX), int32(rayY), rl.Red)
+		rayAngle += DR
 	}
+}
+
+func distance(aX, aY, bX, bY float32) float32 {
+	return float32(math.Sqrt((float64(bX-aX)*float64(bX-aX) + float64(bY-aY)*float64(bY-aY))))
 }
 
 func (player *Player) Move() {
