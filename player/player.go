@@ -47,6 +47,10 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			rayAngle += (2 * math.Pi)
 		}
 
+		if rayAngle > 2*math.Pi {
+			rayAngle -= 2 * math.Pi
+		}
+
 		//Check horizontal lines
 		depthOfField = 0
 		disH = 10000000
@@ -78,8 +82,8 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 		}
 
 		for depthOfField < 16 {
-			mapX = int32(math.Floor(float64(rayX / float32(player.MoveAmount))))
-			mapY = int32(math.Floor(float64(rayY / float32(player.MoveAmount))))
+			mapX = int32(rayX) >> 5
+			mapY = int32(rayY) >> 5
 			mapPosition = mapY*worldMap.XSize + mapX
 
 			if mapPosition > 0 && mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
@@ -103,7 +107,7 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 
 		//Looking westwards
 		if rayAngle > math.Pi/2 && rayAngle < (3*math.Pi)/2 {
-			rayX = (float32((player.XPosition>>5)<<5) - 0.00001)
+			rayX = (float32((player.XPosition>>5)<<5) - 0.0001)
 			rayY = ((float32(player.XPosition)-rayX)*nTan + float32(player.YPosition))
 			xOffset = -float32(player.MoveAmount)
 			yOffset = -xOffset * nTan
@@ -125,8 +129,8 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 		}
 
 		for depthOfField < 16 {
-			mapX = int32(math.Floor(float64(rayX / float32(player.MoveAmount))))
-			mapY = int32(math.Floor(float64(rayY / float32(player.MoveAmount))))
+			mapX = int32(rayX) >> 5
+			mapY = int32(rayY) >> 5
 			mapPosition = mapY*worldMap.XSize + mapX
 
 			if mapPosition > 0 && mapPosition < worldMap.XSize*worldMap.YSize && mapDetails[mapPosition] == 1 {
