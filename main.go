@@ -26,7 +26,7 @@ func main() {
 		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 		1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	}
-	isMapView := true
+	isMapView := false
 
 	rl.InitWindow(1024, 896, "Doodle Crawler")
 	defer rl.CloseWindow()
@@ -47,8 +47,8 @@ func main() {
 		case true:
 			mapOne.DrawMap()
 			playerOne.Draw()
-			playerOne.DrawRays(mapOneDetails, mapOne)
 		case false:
+			playerOne.DrawRays(mapOneDetails, mapOne)
 		}
 
 		playerOne.Move()
