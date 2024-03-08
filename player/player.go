@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	DR = 0.0174533 //one degree in radians
+	DR = math.Pi / 180 //one degree in radians
 )
 
 type Player struct {
@@ -170,7 +170,7 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			cosineAngle -= 2 * math.Pi
 		}
 
-		correctedDistance := int32(float32(disT) * float32(math.Cos(float64(cosineAngle))))
+		correctedDistance := int32(float64(disT) * math.Cos(float64(cosineAngle)))
 		fmt.Println(correctedDistance, disT, rayAngle, playerAngle, cosineAngle)
 
 		lineH := float32(worldMap.BlockSize*416) / float32(correctedDistance) //line height
