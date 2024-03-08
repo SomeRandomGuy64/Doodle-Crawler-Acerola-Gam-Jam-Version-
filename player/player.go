@@ -40,8 +40,8 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 	var ray, mapX, mapY, mapPosition, depthOfField, disT int32
 	var rayX, rayY, rayAngle, xOffset, yOffset, disH, disV float32
 
-	rayAngle = (float32(player.Facing)-1)*(0.5*math.Pi) - 30*DR
-	playerAngle := rayAngle
+	playerAngle := (float32(player.Facing) - 1) * (0.5 * math.Pi)
+	rayAngle = playerAngle - 30*DR
 
 	for ray = 0; ray <= 86; ray++ {
 
@@ -170,10 +170,10 @@ func (player Player) DrawRays(mapDetails []int32, worldMap worldMaps.WorldMap) {
 			cosineAngle -= 2 * math.Pi
 		}
 
-		// disT = int32(float64(disT) * math.Cos(float64(cosineAngle)))
-		fmt.Println(int32(float64(disT)*math.Cos(float64(cosineAngle))), disT, rayAngle, playerAngle, cosineAngle)
+		correctedDistance := int32(float32(disT) * float32(math.Cos(float64(cosineAngle))))
+		fmt.Println(correctedDistance, disT, rayAngle, playerAngle, cosineAngle)
 
-		lineH := float32(worldMap.BlockSize*416) / float32(disT) //line height
+		lineH := float32(worldMap.BlockSize*416) / float32(correctedDistance) //line height
 		if lineH > 416 {
 			lineH = 416
 		}
